@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import axios, { AxiosResponse } from 'axios';
 import * as dotenv from 'dotenv';
 
+import { validationResult } from 'express-validator';
+
 dotenv.config()
 
 const apiInstance = axios.create({
@@ -20,7 +22,12 @@ interface Position {
 
 // getting all posts
 const getShortestPath = async (req: Request, res: Response, next: NextFunction) => {
-    // console.log(req.body);
+
+    const err = validationResult(req);
+
+    if (!err.isEmpty()) {
+        return res.status(400).json({ errors: err.array() });
+    }
     const products: string[] = req.body.products;
     const startingPos: Position = req.body.start;
 
@@ -59,7 +66,6 @@ function naiveSearch(productObjects: any, start: any): any{
             for (let position of productObjects[product]) {
 
                 let pos = {x: position.x, y: position.y, z: position.z};
-                // console.log(calculateDistance(pos, startPos ));
 
                 if (calculateDistance(pos, startPos ) < shortestDist) {
                     shortestDist = calculateDistance(pos, startPos);
@@ -71,10 +77,9 @@ function naiveSearch(productObjects: any, start: any): any{
         startPos = {x: nearestProd.x, y: nearestProd.y, z: nearestProd.z};
         finalPositions.push(nearestProd);
         delete productObjects[nearestProd.productId];
-        // console.log(productObjects);
     }
 
-    console.log('final positions =>', finalPositions, totalDistance);
+    // console.log('final positions =>', finalPositions, totalDistance);
     return {
         pickingOrder: finalPositions.map(pos => 
             ({
