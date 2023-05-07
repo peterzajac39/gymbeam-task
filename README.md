@@ -42,3 +42,7 @@ Expected results are in JSON format as following:
     "distance": 29
 }
 ```
+
+## Tests
+
+Run tests locally with `npm t`
